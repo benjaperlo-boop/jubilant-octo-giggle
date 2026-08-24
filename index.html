@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lámina de avance — Plan de estudio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --blueprint: #12314C;
+  --blueprint-deep: #0B2237;
+  --grid-line: rgba(255,255,255,0.07);
+  --grid-line-strong: rgba(255,255,255,0.14);
+  --paper: #F3EFE4;
+  --paper-dim: #E7E1D1;
+  --ink: #16232F;
+  --ink-soft: #4B5A66;
+  --accent: #E8632E;
+  --accent-soft: rgba(232,99,46,0.18);
+  --cyan: #5FC1D6;
+  --ok: #4E9E78;
+  --ok-soft: rgba(78,158,120,0.18);
+  --font-display: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+body{
+  margin:0;
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--blueprint);
+  color: var(--paper);
+  font-family: var(--font-body);
+  min-height:100vh;
+  padding: 18px 14px 60px;
+}
+
+.wrap{max-width: 520px; margin: 0 auto;}
+
+/* ---- header / title block, like a drawing's title block ---- */
+.titleblock{
+  border: 1px solid var(--grid-line-strong);
+  border-radius: 4px;
+  padding: 16px 16px 14px;
+  margin-bottom: 18px;
+  position: relative;
+  background: rgba(255,255,255,0.02);
+}
+.titleblock .eyebrow{
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+.titleblock h1{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 21px;
+  line-height: 1.25;
+  margin: 0 0 4px;
+  color: var(--paper);
+  letter-spacing: -0.01em;
+}
+.titleblock .sub{
+  font-size: 12.5px;
+  color: rgba(243,239,228,0.55);
+  margin: 0;
+}
+
+/* ---- daily card (tip + meme) ---- */
+.daily{
+  display:grid; gap:10px;
+  margin-bottom: 18px;
+}
+.daily-card{
+  border: 1px solid var(--grid-line-strong);
+  border-radius: 5px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.02);
+  position: relative;
+  overflow: hidden;
+}
+.daily-card::before{
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+}
+.daily-tip::before{ background: var(--cyan); }
+.daily-meme::before{ background: var(--accent); }
+.daily-eyebrow{
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+}
+.daily-tip .daily-eyebrow{ color: var(--cyan); }
+.daily-meme .daily-eyebrow{ color: var(--accent); }
+.daily-body{
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(243,239,228,0.9);
+  margin: 0;
+}
+.daily-meme-emoji{
+  font-size: 26px;
+  margin-bottom: 6px;
+  display:block;
+}
+
+/* ---- dimension-line progress bar ---- */
+.dimline{ margin: 22px 0 8px; }
+.dimline-top{
+  display:flex; align-items:baseline; justify-content:space-between;
+  margin-bottom: 10px;
+}
+.dimline-pct{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  color: var(--accent);
+  line-height: 1;
+}
+.dimline-label{
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: rgba(243,239,228,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+.dimline-track{
+  position: relative;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  border-left: 1px solid var(--grid-line-strong);
+  border-right: 1px solid var(--grid-line-strong);
+}
+.dimline-fill{
+  position: absolute; left:0; top:0; bottom:0;
+  background: linear-gradient(90deg, var(--accent), #F2895C);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+.dimline-ticks{
+  display:flex; justify-content:space-between;
+  margin-top: 4px;
+  padding: 0 1px;
+}
+.dimline-ticks span{
+  width:1px; height:5px; background: var(--grid-line-strong);
+}
+
+/* ---- subject legend / mini progress ---- */
+.legend{
+  display:grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 16px 0 20px;
+}
+.legend-card{
+  border: 1px solid var(--grid-line-strong);
+  border-radius: 4px;
+  padding: 9px 10px;
+  background: rgba(255,255,255,0.02);
+}
+.legend-name{
+  font-size: 10.5px;
+  color: rgba(243,239,228,0.6);
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-display);
+}
+.legend-pct{
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* ---- tabs ---- */
+.tabs{
+  display:flex; gap:6px; overflow-x:auto;
+  margin-bottom: 16px;
+  padding-bottom: 2px;
+}
+.tab{
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--grid-line-strong);
+  background: transparent;
+  color: rgba(243,239,228,0.6);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.tab.active{
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a0f08;
+  font-weight: 700;
+}
+
+/* ---- week sheets ---- */
+.week{
+  border: 1px solid var(--grid-line-strong);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.015);
+}
+.week.current{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
+.week-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.week-head-left{display:flex; align-items:baseline; gap:10px;}
+.week-num{
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--cyan);
+}
+.week-range{
+  font-size: 11.5px;
+  color: rgba(243,239,228,0.5);
+}
+.week-tag{
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 8px;
+}
+.week-head-right{
+  display:flex; align-items:center; gap:8px;
+}
+.week-mini{
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: rgba(243,239,228,0.55);
+}
+.chevron{
+  width: 16px; height:16px;
+  transition: transform 0.2s ease;
+  color: rgba(243,239,228,0.4);
+}
+.week.open .chevron{ transform: rotate(180deg); }
+
+.week-bar{
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  position: relative;
+}
+.week-bar-fill{
+  position:absolute; left:0; top:0; bottom:0;
+  background: var(--ok);
+  transition: width 0.4s ease;
+}
+
+.week-body{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.week.open .week-body{ max-height: 900px; }
+
+.task{
+  display:flex; align-items:flex-start; gap:10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--grid-line);
+}
+.task-check{
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(243,239,228,0.35);
+  margin-top: 1px;
+  display:flex; align-items:center; justify-content:center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+}
+.task-check.done{
+  background: var(--ok);
+  border-color: var(--ok);
+}
+.task-check svg{ width: 12px; height:12px; opacity:0; transition: opacity 0.1s ease; }
+.task-check.done svg{ opacity: 1; }
+.task-text{
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.task.done .task-text{
+  color: rgba(243,239,228,0.4);
+  text-decoration: line-through;
+  text-decoration-color: rgba(243,239,228,0.25);
+}
+.task-subject{
+  font-family: var(--font-display);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.task-day{
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: rgba(243,239,228,0.4);
+  display: block;
+  margin-bottom: 2px;
+}
+.subj-computacion{ background: rgba(95,193,214,0.15); color: var(--cyan); }
+.subj-pye{ background: var(--accent-soft); color: #F2895C; }
+.subj-dibujo{ background: rgba(200,180,120,0.18); color: #D8C48A; }
+.subj-general{ background: rgba(255,255,255,0.08); color: rgba(243,239,228,0.55); }
+
+.loading{
+  text-align:center; padding: 40px 0;
+  font-family: var(--font-display);
+  color: rgba(243,239,228,0.4);
+  font-size: 12px;
+}
+.reset-row{
+  text-align:center; margin-top: 22px;
+}
+.reset-btn{
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  color: rgba(243,239,228,0.35);
+  background: none; border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="titleblock">
+    <p class="eyebrow">Lámina de seguimiento</p>
+    <h1>Plan de estudio — 2° cuatrimestre 2026</h1>
+    <p class="sub">Probabilidad y Estadística · Dibujo Técnico · Computación y Cálculo Numérico</p>
+    <p class="sub" style="margin-top:6px; color:rgba(95,193,214,0.75);">Lun/Mar clase Computación 11:30-14:45 · Mié/Vie Dibujo Técnico 16:30-19 · Jue y finde libres (PyE)</p>
+  </div>
+
+  <div class="daily" id="daily"></div>
+
+  <div class="dimline">
+    <div class="dimline-top">
+      <div class="dimline-pct" id="overall-pct">0%</div>
+      <div class="dimline-label">avance<br>general</div>
+    </div>
+    <div class="dimline-track"><div class="dimline-fill" id="overall-fill"></div></div>
+    <div class="dimline-ticks" id="dimline-ticks"></div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="content"><div class="loading">cargando avance…</div></div>
+
+  <div class="reset-row">
+    <button class="reset-btn" id="reset-btn">reiniciar todo el avance</button>
+  </div>
+
+</div>
+
+<script>
+const SUBJECTS = {
+  computacion: 'Computación',
+  pye: 'PyE',
+  dibujo: 'Dibujo Técnico',
+  general: 'General'
+};
+
+const WEEKS = [
+  { id:1, range:'24/08 – 30/08', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 2: Estructuras de decisión y repetición (ejerc. 5-6)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC1 — Unidad 2 continuación (ejerc. 5.3, 6.3)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 2: Probabilidad y Variables Aleatorias (sigue en curso)'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:2, range:'31/08 – 06/09', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 3: E/S estándar, lectura/escritura archivos de texto (ejerc. 7-8.1)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'Unidad 3 continuación (ejerc. 7.3)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 2 cierre / Unidad 3 inicio (Modelos de Probabilidad)'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:3, range:'07/09 – 13/09', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 3: CSV, gráficos 2D (ejerc. 8.2, 9.1-9.2)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC2 — continuación (ejerc. 8.3)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 3 completa: Binomial, Poisson, Normal, Exponencial, TLC'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:4, range:'14/09 – 20/09', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidades 3-4-5: gráficos 3D, intro Cálculo Numérico (ejerc. 9.3, 10-11)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'Continuación (ejerc. 9.4)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 4: Estimación de Parámetros (inicio) + revisión prácticos grupales 2'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:5, range:'21/09 – 27/09', tag:'Parcial 1', tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Clase virtual de refuerzo — repaso Unidades 1-3'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC3 — repaso (ejerc. 11.5, 12.5)'},
+    {s:'pye', d:'Mié · 16:30-19', t:'REPASO general Unidades 1 a 4'},
+    {s:'pye', d:'Jue · libre', t:'REPASO / simulacro de parcial'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'Posible Parcial 1 + repaso de errores recurrentes'},
+    {s:'pye', d:'Sáb/Dom · libre', t:'Parcial Nro. 1'},
+  ]},
+  { id:6, range:'28/09 – 04/10', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 6: Interpolación y aproximación (ejerc. 12)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC4 — continuación (ejerc. 13.5, 14.5)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 4: Intervalos de confianza (confirmar si ya se vio antes del Parcial 1)'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:7, range:'05/10 – 11/10', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 7: Diferenciación e integración numérica (ejerc. 13-14)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC5 — continuación (ejerc. 15.6)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 5: Pruebas de Hipótesis (formulación, errores tipo I/II)'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:8, range:'12/10 – 18/10', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Clase virtual de refuerzo — diferenciación/integración numérica'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC6 — repaso (ejerc. 16.5)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 5: pruebas para media y varianza de una población'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:9, range:'19/10 – 25/10', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 7: Resolución numérica de ecuaciones diferenciales (ejerc. 15-16)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC7 — continuación (ejerc. 17.7)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 5: comparación medias/varianzas, Chi-Cuadrado, K-S + revisión prácticos grupales 3'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:10, range:'26/10 – 01/11', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 8: Principios del modelado matemático (ejerc. 17)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC8 — continuación (ejerc. 17.7)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 6: Correlación (dispersión, coeficiente de correlación)'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación semanal'},
+  ]},
+  { id:11, range:'02/11 – 08/11', tag:null, tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Unidad 9: Modelado con ecuaciones diferenciales (ejerc. 18)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'ECC9 (última) — continuación (ejerc. 19.5)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Entrega croquis'},
+    {s:'pye', d:'Jue · libre', t:'Unidad 6: Regresión lineal simple + revisión prácticos grupales 4'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'CAD corregido + ejercicios Computación'},
+    {s:'general', d:'Sáb/Dom · libre', t:'Autoevaluación + repaso de ECC más flojas'},
+  ]},
+  { id:12, range:'09/11 – 15/11', tag:'Parcial 2', tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Semana libre — repasar Unidades 6 a 9 completas'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'Repaso general — rehacer 2-3 ECC viejas como simulacro'},
+    {s:'pye', d:'Mié · 16:30-19', t:'REPASO general Unidades 5 y 6'},
+    {s:'pye', d:'Jue · libre', t:'Simulacro de Parcial 2'},
+    {s:'dibujo', d:'Vie · 16:30-19', t:'Posible Parcial 2 + repaso de errores recurrentes'},
+    {s:'pye', d:'Sáb/Dom · libre', t:'Parcial Nro. 2'},
+  ]},
+  { id:13, range:'16/11 – 21/11', tag:'Cierre', tasks:[
+    {s:'computacion', d:'Lun · 11:30-14:45', t:'Repaso general (día oficial de repaso)'},
+    {s:'computacion', d:'Mar · 11:30-14:45', t:'Recuperatorio (si hay ECC pendiente)'},
+    {s:'dibujo', d:'Mié · 16:30-19', t:'Cierre de entregas pendientes'},
+    {s:'pye', d:'Jue-Vie · libre/16:30-19', t:'Repaso puntual de unidades a recuperar'},
+    {s:'pye', d:'Sáb · libre', t:'Parcial de Recuperación'},
+  ]},
+];
+
+// flatten tasks with unique ids
+const ALL_TASKS = [];
+WEEKS.forEach(w => {
+  w.tasks.forEach((task, i) => {
+    task.id = 'w' + w.id + '-t' + i;
+    ALL_TASKS.push(task);
+  });
+});
+
+const TIPS = [
+  'Estudiar 45 min y descansar 10 rinde más que 3 horas seguidas sin cortar.',
+  'Antes de mirar el apunte, intentá resolver el ejercicio de memoria. El error que cometas ahí es justo lo que hay que repasar.',
+  'Explicá un concepto en voz alta como si se lo estuvieras enseñando a alguien. Si no te sale simple, no lo sabés del todo todavía.',
+  'Guardá los últimos 15 minutos del día para anotar qué te costó — mañana arrancás por ahí, no de cero.',
+  'Cronometrá los ejercicios de práctico como si fuera el parcial. La presión de tiempo también hay que entrenarla.',
+  'Si un tema te cuesta dos veces seguidas, no sigas avanzando: parate ahí antes de acumular más atraso.',
+  'Dormir mal la noche anterior a estudiar rinde peor que estudiar una hora menos y dormir bien.',
+  'Repasar es distinto de releer. Cerrá el apunte y probá reconstruir el tema de memoria.',
+  'Empezá por lo que menos ganas te da. Al final del día, cuando estás cansado, dejá lo que ya dominás.',
+  'Una ECC vieja resuelta de nuevo sin mirar la solución vale más que dos ejercicios nuevos fáciles.',
+  'Si te trabaste 20 minutos con lo mismo, cambiá de materia y volvé después con la cabeza fresca.',
+  'Anotá los errores típicos que te marcan en las correcciones — son tu lista personal de lo que hay que reforzar.',
+];
+
+const MEMES = [
+  { emoji: '📐', text: 'Yo diciendo "esta semana me pongo al día con todo": la más pura ficción académica.' },
+  { emoji: '☕', text: 'Nivel de cafeína vs. nivel de entendimiento del Teorema del Límite Central: correlación negativa confirmada.' },
+  { emoji: '🧮', text: 'Cálculo Numérico: la materia que te hace desconfiar hasta de las cuentas que hacés en el kiosco.' },
+  { emoji: '📏', text: 'Dibujo Técnico enseñándome a acotar planos mientras yo no puedo acotar mi propio tiempo libre.' },
+  { emoji: '🎲', text: 'PyE: la única materia donde "no sé" también es una respuesta con probabilidad asociada.' },
+  { emoji: '🖥️', text: 'Mi código de Computación funcionando a la primera: estadísticamente poco probable, emocionalmente devastador cuando pasa.' },
+  { emoji: '📊', text: 'Cada ECC que apruebo, mi varianza de estrés aumenta igual porque ya pienso en la siguiente.' },
+  { emoji: '🌙', text: 'Estudiar a las 2 AM: técnicamente posible, académicamente cuestionable, emocionalmente una tradición.' },
+  { emoji: '🖊️', text: 'El croquis que entrego el miércoles y el croquis que yo creía haber entregado son dos entidades distintas.' },
+  { emoji: '🔁', text: 'Repasar la Unidad 2 por cuarta vez con la sensación de conocerla por primera vez.' },
+];
+
+function dayIndex(mod){
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 0);
+  const diff = d - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return dayOfYear % mod;
+}
+
+function renderDaily(){
+  const tip = TIPS[dayIndex(TIPS.length)];
+  const meme = MEMES[dayIndex(MEMES.length)];
+  const daily = document.getElementById('daily');
+  daily.innerHTML = `
+    <div class="daily-card daily-tip">
+      <p class="daily-eyebrow">Tip del día</p>
+      <p class="daily-body">${tip}</p>
+    </div>
+    <div class="daily-card daily-meme">
+      <span class="daily-meme-emoji">${meme.emoji}</span>
+      <p class="daily-eyebrow">Meme del día</p>
+      <p class="daily-body">${meme.text}</p>
+    </div>
+  `;
+}
+
+const STORAGE_KEY = 'plan-estudio-progress';
+
+// Semilla inicial: Computación al día (semanas 1-4 completas), PyE sin empezar.
+// Solo se aplica la primera vez que se abre la app (si todavía no hay avance guardado).
+const DEFAULT_PROGRESS = {
+  'w1-t0': true, 'w1-t1': true,
+  'w2-t0': true, 'w2-t1': true,
+  'w3-t0': true, 'w3-t1': true,
+  'w4-t0': true, 'w4-t1': true,
+};
+
+let progress = {};
+let activeTab = 'all';
+let openWeeks = new Set([1]); // semana actual abierta por defecto
+
+const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#0B2237" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+async function loadProgress(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY);
+    if(res && res.value){
+      progress = JSON.parse(res.value);
+    } else {
+      progress = { ...DEFAULT_PROGRESS };
+      await saveProgress();
+    }
+  }catch(e){
+    // si la clave no existe todavía, storage.get puede tirar error: usamos la semilla
+    progress = { ...DEFAULT_PROGRESS };
+    try{ await saveProgress(); }catch(e2){}
+  }
+  render();
+}
+
+async function saveProgress(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(progress));
+  }catch(e){
+    console.error('No se pudo guardar el avance', e);
+  }
+}
+
+function toggleTask(id){
+  progress[id] = !progress[id];
+  render();
+  saveProgress();
+}
+
+function pct(tasks){
+  if(tasks.length === 0) return 0;
+  const done = tasks.filter(t => progress[t.id]).length;
+  return Math.round((done / tasks.length) * 100);
+}
+
+function renderLegend(){
+  const legend = document.getElementById('legend');
+  const subjKeys = ['computacion','pye','dibujo'];
+  legend.innerHTML = subjKeys.map(k => {
+    const tasks = ALL_TASKS.filter(t => t.s === k);
+    const p = pct(tasks);
+    return `<div class="legend-card">
+      <p class="legend-name">${SUBJECTS[k]}</p>
+      <p class="legend-pct" style="color:${p===100?'var(--ok)':'var(--paper)'}">${p}%</p>
+    </div>`;
+  }).join('');
+}
+
+function renderTabs(){
+  const tabs = document.getElementById('tabs');
+  const opts = [['all','Todas'],['computacion','Computación'],['pye','PyE'],['dibujo','Dibujo Técnico']];
+  tabs.innerHTML = opts.map(([k,label]) =>
+    `<button class="tab ${activeTab===k?'active':''}" data-tab="${k}">${label}</button>`
+  ).join('');
+  tabs.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      render();
+    });
+  });
+}
+
+function renderOverall(){
+  const p = pct(ALL_TASKS);
+  document.getElementById('overall-pct').textContent = p + '%';
+  document.getElementById('overall-fill').style.width = p + '%';
+  const ticks = document.getElementById('dimline-ticks');
+  ticks.innerHTML = WEEKS.map(() => '<span></span>').join('');
+}
+
+function renderWeeks(){
+  const content = document.getElementById('content');
+  const visibleWeeks = WEEKS.map(w => {
+    const tasks = activeTab === 'all' ? w.tasks : w.tasks.filter(t => t.s === activeTab);
+    return { ...w, visibleTasks: tasks };
+  }).filter(w => w.visibleTasks.length > 0);
+
+  content.innerHTML = visibleWeeks.map(w => {
+    const p = pct(w.tasks);
+    const isOpen = openWeeks.has(w.id);
+    const isCurrent = w.id === 4;
+    return `
+    <div class="week ${isOpen?'open':''} ${isCurrent?'current':''}" data-week="${w.id}">
+      <div class="week-head" data-toggle="${w.id}">
+        <div class="week-head-left">
+          <span class="week-num">SEM ${String(w.id).padStart(2,'0')}</span>
+          <span class="week-range">${w.range}</span>
+          ${w.tag ? `<span class="week-tag">${w.tag}</span>` : ''}
+        </div>
+        <div class="week-head-right">
+          <span class="week-mini">${p}%</span>
+          <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="week-bar"><div class="week-bar-fill" style="width:${p}%"></div></div>
+      <div class="week-body">
+        ${w.visibleTasks.map(t => `
+          <div class="task ${progress[t.id]?'done':''}" data-task="${t.id}">
+            <div class="task-check ${progress[t.id]?'done':''}" data-check="${t.id}">${CHECK_SVG}</div>
+            <span class="task-subject subj-${t.s}">${SUBJECTS[t.s]}</span>
+            <div class="task-text" data-check="${t.id}"><span class="task-day">${t.d || ''}</span>${t.t}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  content.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.toggle);
+      if(openWeeks.has(id)) openWeeks.delete(id); else openWeeks.add(id);
+      render();
+    });
+  });
+  content.querySelectorAll('[data-check]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTask(el.dataset.check);
+    });
+  });
+}
+
+function render(){
+  renderDaily();
+  renderOverall();
+  renderLegend();
+  renderTabs();
+  renderWeeks();
+}
+
+document.getElementById('reset-btn').addEventListener('click', async () => {
+  if(!confirm('¿Reiniciar todo el avance marcado?')) return;
+  progress = {};
+  render();
+  await saveProgress();
+});
+
+loadProgress();
+</script>
+</body>
+</html>
