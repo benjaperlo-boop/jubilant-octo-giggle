@@ -1,3 +1,43 @@
+
+Conversación con Gemini
+Quiero que modifiques este código para que todo el progreso de mi página se guarde automáticamente usando localStorage. Quiero que al cerrar o recargar la página, el progreso siga exactamente donde estaba. Detectá qué datos deben guardarse y hacé que se guarden automáticamente cada vez que cambien. No cambies el diseño ni elimines ninguna función. Devolveme el código completo listo para reemplazar mi index.html.
+
+Aquí tenés el código completo listo para reemplazar tu archivo index.html.
+
+Se reemplazó la API asíncrona genérica por localStorage, guardando automáticamente el estado de las tareas completadas (progress), la pestaña activa (activeTab) y las semanas desplegadas (openWeeks) cada vez que realizás un cambio.
+
+Has parado esta respuesta
+como lo descargo?
+
+Aquí tenés el archivo completo listo para descargar:
+
+Icono de HTML
+index
+ HTML 
+Abierto
+Pasos para usarlo en tu computadora:
+Descargá el archivo haciendo clic en el enlace/botón de arriba.
+
+Guardá o reemplazá el archivo existente con el nombre index.html.
+
+Abrilo con tu navegador web (Chrome, Firefox, Edge, Safari, etc.) haciendo doble clic sobre él.
+
+¿Cómo funciona el guardado automático integrado?
+Progresos / Tareas: Cada vez que marcás o desmarcás un casillero, se guarda inmediatamente el estado en el almacenamiento interno de tu navegador (localStorage).
+
+Pestañas: Si filtrás por una materia (ej. Computación o PyE) y recargás, se mantiene seleccionada esa pestaña.
+
+Semanas desplegadas: Si abrís o cerrás semanas específicas, recordará cuáles tenías abiertas.
+
+Botón de reinicio: El botón "reiniciar todo el avance" al final te permite borrar los datos guardados si querés volver a empezar desde cero.
+
+2 / 2
+
+
+
+Tus conversaciones de Universidad Nacional de Córdoba no se usan para mejorar nuestros modelos. Gemini es una IA y puede cometer errores. Tu privacidad y GeminiSe abre en una ventana nueva
+
+Analizando
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -515,7 +555,7 @@ const TIPS = [
   'Explicá un concepto en voz alta como si se lo estuvieras enseñando a alguien. Si no te sale simple, no lo sabés del todo todavía.',
   'Guardá los últimos 15 minutos del día para anotar qué te costó — mañana arrancás por ahí, no de cero.',
   'Cronometrá los ejercicios de práctico como si fuera el parcial. La presión de tiempo también hay que entrenarla.',
-  'Si un tema te cuesta dos veces seguidas, no sigas avanzando: parate ahí antes de acumular más atraso.',
+  'Si un tema te cuesta dos veces seguidas, no sigas advancing: parate ahí antes de acumular más atraso.',
   'Dormir mal la noche anterior a estudiar rinde peor que estudiar una hora menos y dormir bien.',
   'Repasar es distinto de releer. Cerrá el apunte y probá reconstruir el tema de memoria.',
   'Empezá por lo que menos ganas te da. Al final del día, cuando estás cansado, dejá lo que ya dominás.',
@@ -563,10 +603,10 @@ function renderDaily(){
   `;
 }
 
-const STORAGE_KEY = 'plan-estudio-progress';
+const STORAGE_KEY_PROGRESS = 'plan-estudio-progress';
+const STORAGE_KEY_TAB = 'plan-estudio-tab';
+const STORAGE_KEY_WEEKS = 'plan-estudio-open-weeks';
 
-// Semilla inicial: Computación al día (semanas 1-4 completas), PyE sin empezar.
-// Solo se aplica la primera vez que se abre la app (si todavía no hay avance guardado).
 const DEFAULT_PROGRESS = {
   'w1-t0': true, 'w1-t1': true,
   'w2-t0': true, 'w2-t1': true,
@@ -576,32 +616,57 @@ const DEFAULT_PROGRESS = {
 
 let progress = {};
 let activeTab = 'all';
-let openWeeks = new Set([1]); // semana actual abierta por defecto
+let openWeeks = new Set([1]);
 
 const CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.5 12L13 4.5" stroke="#0B2237" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-async function loadProgress(){
-  try{
-    const res = await window.storage.get(STORAGE_KEY);
-    if(res && res.value){
-      progress = JSON.parse(res.value);
+function loadState(){
+  try {
+    const savedProgress = localStorage.getItem(STORAGE_KEY_PROGRESS);
+    if (savedProgress !== null) {
+      progress = JSON.parse(savedProgress);
     } else {
       progress = { ...DEFAULT_PROGRESS };
-      await saveProgress();
+      localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(progress));
     }
-  }catch(e){
-    // si la clave no existe todavía, storage.get puede tirar error: usamos la semilla
+
+    const savedTab = localStorage.getItem(STORAGE_KEY_TAB);
+    if (savedTab !== null) {
+      activeTab = savedTab;
+    }
+
+    const savedWeeks = localStorage.getItem(STORAGE_KEY_WEEKS);
+    if (savedWeeks !== null) {
+      openWeeks = new Set(JSON.parse(savedWeeks));
+    }
+  } catch(e) {
+    console.error('Error al cargar de localStorage:', e);
     progress = { ...DEFAULT_PROGRESS };
-    try{ await saveProgress(); }catch(e2){}
   }
   render();
 }
 
-async function saveProgress(){
-  try{
-    await window.storage.set(STORAGE_KEY, JSON.stringify(progress));
-  }catch(e){
-    console.error('No se pudo guardar el avance', e);
+function saveProgress(){
+  try {
+    localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(progress));
+  } catch(e) {
+    console.error('Error al guardar el avance:', e);
+  }
+}
+
+function saveTab(){
+  try {
+    localStorage.setItem(STORAGE_KEY_TAB, activeTab);
+  } catch(e) {
+    console.error('Error al guardar la pestaña:', e);
+  }
+}
+
+function saveWeeks(){
+  try {
+    localStorage.setItem(STORAGE_KEY_WEEKS, JSON.stringify(Array.from(openWeeks)));
+  } catch(e) {
+    console.error('Error al guardar semanas abiertas:', e);
   }
 }
 
@@ -639,6 +704,7 @@ function renderTabs(){
   tabs.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => {
       activeTab = btn.dataset.tab;
+      saveTab();
       render();
     });
   });
@@ -693,6 +759,7 @@ function renderWeeks(){
     el.addEventListener('click', () => {
       const id = parseInt(el.dataset.toggle);
       if(openWeeks.has(id)) openWeeks.delete(id); else openWeeks.add(id);
+      saveWeeks();
       render();
     });
   });
@@ -712,14 +779,16 @@ function render(){
   renderWeeks();
 }
 
-document.getElementById('reset-btn').addEventListener('click', async () => {
+document.getElementById('reset-btn').addEventListener('click', () => {
   if(!confirm('¿Reiniciar todo el avance marcado?')) return;
   progress = {};
   render();
-  await saveProgress();
+  saveProgress();
 });
 
-loadProgress();
+loadState();
 </script>
 </body>
 </html>
+index.html
+Mostrando index.html.
